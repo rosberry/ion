@@ -26,7 +26,10 @@ extension Array where Element: Weak {
     }
 
     mutating func append(weak: Element.T) {
-        let object: Element = WeakRef(object: weak) as! Element
+        guard let object: Element = WeakRef(object: weak) as? Element else {
+            return
+        }
+        
         append(object)
     }
 
