@@ -32,7 +32,16 @@ class Service {
         Character(name: "Aureliano Buendía", source: .book("One Hundred Years of Solitude")),
     ]
 
-    private lazy var singleCharacterEmitter = Emitter<Character>()
+    private lazy var characterLogger: Logger<Character> = {
+        return .init()
+    }()
+
+    private lazy var singleCharacterEmitter: Emitter<Character> = {
+        let emitter = Emitter<Character>()
+        emitter.delegate = characterLogger
+        return emitter
+    }()
+    
     lazy var singleCharacterSource = AnyEventSource(singleCharacterEmitter)
 
     private lazy var characterListEmitter = Emitter<[Character]>()
