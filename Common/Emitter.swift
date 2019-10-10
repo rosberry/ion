@@ -19,7 +19,21 @@ open class Emitter<T>: EventSink, EventSource {
     public private(set) var subscribers: [Subscriber<T>] = []
     public private(set) var values: [T] = []
     public var valueStackDepth: Int
-    public weak var delegate: EmitterDelegate?
+
+    public weak var delegate: EmitterDelegate? {
+        set {
+            logger.target = newValue
+        }
+        get {
+            return logger.target
+        }
+    }
+
+    public private(set) lazy var logger: Logger<T> = {
+        let logger = Logger<T>()
+        logger.isEnabled = false
+        return logger
+    }()
 
     public init(valueStackDepth: Int = .max) {
         self.valueStackDepth = valueStackDepth
@@ -35,11 +49,11 @@ open class Emitter<T>: EventSink, EventSource {
     public func subscribe(_ subscriber: Subscriber<T>) -> Subscriber<T> {
         if subscribers.index(of: subscriber) == nil {
             subscribers.append(subscriber)
-            delegate?.emitter(self, didRegister: subscriber)
+            logger.emitter(self, didRegister: subscriber)
 
             for value in values where subscriber.match(value) {
                 subscriber.emitUpdate(value)
-                delegate?.emitter(self, didPropagate: value, to: subscriber)
+                logger.emitter(self, didPropagate: value, to: subscriber)
             }
         }
 
@@ -49,7 +63,7 @@ open class Emitter<T>: EventSink, EventSource {
     public func unsubscribe(_ subscriber: Subscriber<T>) {
         if let index = subscribers.index(of: subscriber) {
             subscribers.remove(at: index)
-            delegate?.emitter(self, didUnregister: subscriber)
+            logger.emitter(self, didUnregister: subscriber)
         }
     }
 
@@ -65,7 +79,7 @@ open class Emitter<T>: EventSink, EventSource {
 
         for subscriber in subscribers where subscriber.match(value) {
             subscriber.emitUpdate(value)
-            delegate?.emitter(self, didPropagate: value, to: subscriber)
+            logger.emitter(self, didPropagate: value, to: subscriber)
         }
 
         if values.count > valueStackDepth {
@@ -76,20 +90,20 @@ open class Emitter<T>: EventSink, EventSource {
     public func emit(_ value: T) {
         discard()
 
-        delegate?.emitter(self, willEmit: value)
+        logger.emitter(self, willEmit: value)
         propagate(value)
     }
 
     public func replace(_ value: T) {
         discard()
 
-        delegate?.emitter(self, willReplace: value)
+        logger.emitter(self, willReplace: value)
         propagate(value)
     }
 
     public func discard(_ value: T) {
         discard()
-        delegate?.emitter(self, didDiscard: value)
+        logger.emitter(self, didDiscard: value)
     }
 
     public func discard() {
@@ -103,14 +117,14 @@ extension Emitter where T: Equatable {
     public func emit(_ value: T) {
         discard(value)
 
-        delegate?.emitter(self, willEmit: value)
+        logger.emitter(self, willEmit: value)
         propagate(value)
     }
 
     public func discard(_ value: T) {
         if let index = values.index(of: value) {
             values.remove(at: index)
-            delegate?.emitter(self, didDiscard: value)
+            logger.emitter(self, didDiscard: value)
         }
     }
 }
