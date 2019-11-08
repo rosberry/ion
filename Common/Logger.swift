@@ -17,12 +17,12 @@ final public class Logger<T>: EmitterDelegate {
         return "\(Unmanaged.passUnretained(object).toOpaque())"
     }
 
-    private func logIfNeeded<T>(emitter: Emitter<T>, message: String) {
+    private func logIfNeeded<T>(emitter: Emitter<T>, message: @autoclosure () -> String) {
         guard isEnabled else {
             return
         }
 
-        print("[II] E[\(name ?? pointerString(to: emitter))] \(message)")
+        print("[II] E[\(name ?? pointerString(to: emitter))] \(message())")
     }
 
     public func emitter<T>(_ sender: Emitter<T>, didRegister subscriber: Subscriber<T>) {
