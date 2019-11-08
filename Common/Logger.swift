@@ -13,49 +13,45 @@ final public class Logger<T>: EmitterDelegate {
 
     public init() {}
 
-    private func pointer(to object: AnyObject) -> String {
+    private func pointerString(to object: AnyObject) -> String {
         return "\(Unmanaged.passUnretained(object).toOpaque())"
     }
 
-    public func emitter<T>(_ sender: Emitter<T>, didRegister subscriber: Subscriber<T>) {
-        if isEnabled {
-            print("[II] E[\(name ?? pointer(to: sender))] didRegister: \(pointer(to: subscriber))")
+    private func logIfNeeded<T>(emitter: Emitter<T>, message: String) {
+        guard isEnabled else {
+            return
         }
+
+        print("[II] E[\(name ?? pointerString(to: emitter))] \(message)")
+    }
+
+    public func emitter<T>(_ sender: Emitter<T>, didRegister subscriber: Subscriber<T>) {
+        logIfNeeded(emitter: sender, message: "didRegister: \(pointerString(to: subscriber))")
         target?.emitter(sender, didRegister: subscriber)
     }
 
     public func emitter<T>(_ sender: Emitter<T>, didUnregister subscriber: Subscriber<T>) {
-        if isEnabled {
-            print("[II] E[\(name ?? pointer(to: sender))] didUnregister: \(pointer(to: subscriber))")
-        }
+        logIfNeeded(emitter: sender, message: "didUnregister: \(pointerString(to: subscriber))")
         target?.emitter(sender, didUnregister: subscriber)
     }
 
     public func emitter<T>(_ sender: Emitter<T>, willEmit value: T) {
-        if isEnabled {
-            print("[II] E[\(name ?? pointer(to: sender))] willEmit: \(value)")
-        }
+        logIfNeeded(emitter: sender, message: "willEmit: \(value)")
         target?.emitter(sender, willEmit: value)
     }
 
     public func emitter<T>(_ sender: Emitter<T>, willReplace value: T) {
-        if isEnabled {
-            print("[II] E[\(name ?? pointer(to: sender))] willReplace: \(value)")
-        }
+        logIfNeeded(emitter: sender, message: "willReplace: \(value)")
         target?.emitter(sender, willReplace: value)
     }
 
     public func emitter<T>(_ sender: Emitter<T>, didPropagate value: T, to subscriber: Subscriber<T>) {
-        if isEnabled {
-            print("[II] E[\(name ?? pointer(to: sender))] didPropagate: \(value) to: \(pointer(to: subscriber))")
-        }
+        logIfNeeded(emitter: sender, message: "didPropagate: \(value) to: \(pointerString(to: subscriber))")
         target?.emitter(sender, didPropagate: value, to: subscriber)
     }
 
     public func emitter<T>(_ sender: Emitter<T>, didDiscard value: T) {
-        if isEnabled {
-            print("[II] E[\(name ?? pointer(to: sender))] didDiscard: \(value)")
-        }
+        logIfNeeded(emitter: sender, message: "didDiscard: \(value)")
         target?.emitter(sender, didDiscard: value)
     }
 }
