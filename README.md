@@ -81,6 +81,16 @@ It's possible to write custom matchers as well by implementing `Matcher` protoco
 __Ion__ is not intended and never will be a replacement for RxSwift or any similar library. __Ion__ is aimed at providing minimal functionality and be as lightweight and simple as possible.
 
 ## Installation
+
+[__Depo__](https://github.com/rosberry/depo)
+
+You can use Depo to install Ion by adding it to your `Depofile`:
+```yaml
+carts:
+  - kind: github
+    identifier: rosberry/ion
+```
+
 __Carthage__
 
 Create a Cartfile that lists the framework and run carthage update. Follow the instructions to add the framework to your project.
